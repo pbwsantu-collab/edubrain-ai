@@ -25,11 +25,15 @@ import {
   type RepoInspection,
 } from '@/lib/coding/githubInspect';
 import { cn } from '@/lib/utils';
+import { requestCodingPatch } from '@/lib/ai/chat';
 
 export function CodingPage() {
   const [goal, setGoal] = useState('Add a dark-mode toggle to the settings page');
   const [repoUrl, setRepoUrl] = useState('https://github.com/pbwsantu-collab/edubrain-ai');
-  const [permission, setPermission] = useState<PermissionLevel>('SAFE');
+  const [permission, setPermission] = useState<PermissionLevel>(() => {
+    const v = localStorage.getItem('edubrain_coding_permission');
+    return v === 'ASSISTED' || v === 'AUTONOMOUS' || v === 'SAFE' ? v : 'SAFE';
+  });
   const [plan, setPlan] = useState<CodingPlanStep[] | null>(null);
   const [inspection, setInspection] = useState<RepoInspection | null>(null);
   const [inspecting, setInspecting] = useState(false);
@@ -37,6 +41,7 @@ export function CodingPage() {
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
   const [patchText, setPatchText] = useState<string | null>(null);
+  const [patchLoading, setPatchLoading] = useState(false);
 
   const allowed = useMemo(() => CODING_PERMISSIONS[permission], [permission]);
   const interestingFiles = useMemo(
@@ -70,6 +75,20 @@ export function CodingPage() {
         setFileContent(result.content);
         if (goal.trim()) {
           setPatchText(proposeSimplePatch(path, result.content, goal.trim()).unifiedDiff);
+          setPatchLoading(true);
+          try {
+            const ai = await requestCodingPatch({
+              goal: goal.trim(),
+              path,
+              fileContent: result.content,
+              permission,
+            });
+            if (ai?.content) setPatchText(ai.content);
+          } catch {
+            /* keep scaffold */
+          } finally {
+            setPatchLoading(false);
+          }
         }
       }
     } finally {
@@ -96,31 +115,28 @@ export function CodingPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Coding Agent</h1>
         <p className="mt-1 text-slate-400">
-          Inspect public repos, open files, review patch proposals — no silent deploy
+          Inspect · open files · LLM patch proposal (not applied) · no silent deploy
         </p>
       </div>
 
       <div className="card border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-100/90">
         <div className="flex gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-          <div>
-            <p className="font-medium text-amber-200">Controlled agent</p>
-            <p className="mt-1 text-amber-100/70">
-              Public inspect and file read work without a token. Patches are proposals only (not applied).
-            </p>
-          </div>
+          <p className="text-amber-100/70">
+            Patches require deployed <code className="text-amber-200">ai-chat</code> + API key. Otherwise a scaffold proposal is shown. Nothing is written to the repo.
+          </p>
         </div>
       </div>
 
       <form onSubmit={handlePlan} className="card space-y-4 p-5">
         <div>
           <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">Goal</label>
-          <textarea value={goal} onChange={(e) => setGoal(e.target.value)} rows={3} className="input w-full resize-y" placeholder="Describe what to build or fix" />
+          <textarea value={goal} onChange={(e) => setGoal(e.target.value)} rows={3} className="input w-full resize-y" />
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">Repository URL</label>
           <div className="flex gap-2">
-            <input value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} className="input flex-1" placeholder="https://github.com/org/repo" />
+            <input value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} className="input flex-1" />
             <button type="button" onClick={handleInspect} disabled={inspecting || !repoUrl.trim()} className="btn-secondary shrink-0">
               {inspecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderSearch className="h-4 w-4" />}
               Inspect
@@ -167,7 +183,7 @@ export function CodingPage() {
               </div>
               {interestingFiles.length > 0 && (
                 <div>
-                  <div className="text-xs font-medium uppercase tracking-wider text-slate-500">Key files — click to open</div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-slate-500">Key files — click to open + propose patch</div>
                   <ul className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/40 p-2 font-mono text-[11px] text-slate-400">
                     {interestingFiles.map((f) => (
                       <li key={f}>
@@ -191,10 +207,15 @@ export function CodingPage() {
           {fileContent && (
             <pre className="max-h-64 overflow-auto rounded-xl border border-slate-800 bg-slate-950 p-3 text-[11px] text-slate-400 whitespace-pre-wrap">{fileContent.slice(0, 8000)}</pre>
           )}
-          {patchText && (
+          {(patchLoading || patchText) && (
             <div>
-              <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">Patch proposal (not applied)</div>
-              <pre className="max-h-48 overflow-auto rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-[11px] text-amber-100/80 whitespace-pre-wrap">{patchText}</pre>
+              <div className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                Patch proposal (not applied)
+                {patchLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+              </div>
+              {patchText && (
+                <pre className="max-h-64 overflow-auto rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-[11px] text-amber-100/80 whitespace-pre-wrap">{patchText}</pre>
+              )}
             </div>
           )}
         </section>
