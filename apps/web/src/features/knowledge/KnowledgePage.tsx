@@ -3,6 +3,7 @@ import { FileText, Loader2, Plus, Trash2, BookMarked } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
+import { embedAndStoreChunk, splitIntoChunks } from '@/lib/knowledge/embed';
 
 interface KnowledgeDoc {
   id: string;
@@ -59,19 +60,42 @@ export function KnowledgePage() {
           user_id: user.id,
           title: title.trim(),
           source_type: 'note',
-          status: 'ready',
+          status: 'processing',
           metadata: { chars: body.length },
         })
         .select('id')
         .single();
       if (dErr) throw dErr;
 
-      await supabase.from('knowledge_chunks').insert({
-        document_id: doc.id,
-        chunk_index: 0,
-        content: body.trim(),
-        token_count: Math.ceil(body.trim().split(/\s+/).length * 1.3),
-      });
+      const pieces = splitIntoChunks(body.trim());
+      let embedOk = 0;
+      for (let i = 0; i < pieces.length; i++) {
+        const { data: chunk, error: cErr } = await supabase
+          .from('knowledge_chunks')
+          .insert({
+            document_id: doc.id,
+            chunk_index: i,
+            content: pieces[i],
+            token_count: Math.ceil(pieces[i].split(/\s+/).length * 1.3),
+          })
+          .select('id')
+          .single();
+        if (cErr) throw cErr;
+        const emb = await embedAndStoreChunk(chunk.id, pieces[i]);
+        if (emb.ok) embedOk += 1;
+      }
+
+      await supabase
+        .from('knowledge_documents')
+        .update({
+          status: 'ready',
+          metadata: {
+            chars: body.length,
+            chunks: pieces.length,
+            embedded: embedOk,
+          },
+        })
+        .eq('id', doc.id);
 
       setTitle('');
       setBody('');
@@ -93,11 +117,9 @@ export function KnowledgePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-4 sm:p-6 lg:p-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          Knowledge
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Knowledge</h1>
         <p className="mt-1 text-slate-400">
-          Notes and sources the AI can use — Phase 3 foundation (RAG embeddings next)
+          Notes chunked and embedded when embed-text is deployed
         </p>
       </div>
 
@@ -152,9 +174,6 @@ export function KnowledgePage() {
         <div className="card p-8 text-center text-slate-400">
           <FileText className="mx-auto h-10 w-10 text-slate-600" />
           <p className="mt-3">No knowledge items yet.</p>
-          <p className="mt-1 text-sm text-slate-500">
-            Add a note above. PDF upload and embeddings come next.
-          </p>
         </div>
       )}
 
@@ -165,8 +184,7 @@ export function KnowledgePage() {
             <div className="min-w-0 flex-1">
               <div className="truncate font-medium text-white">{d.title}</div>
               <div className="text-xs text-slate-500">
-                {d.source_type} · {d.status} ·{' '}
-                {new Date(d.created_at).toLocaleDateString()}
+                {d.source_type} · {d.status} · {new Date(d.created_at).toLocaleDateString()}
               </div>
             </div>
             <span

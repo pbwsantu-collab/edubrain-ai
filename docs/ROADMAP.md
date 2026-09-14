@@ -1,42 +1,34 @@
 # EDUBRAIN AI — Development Roadmap
 
-## Phase 0 — Architecture ✅
-## Phase 1 — Core Platform (complete)
-## Phase 2 — Teaching Engine (MVP complete)
+## Phase 0–2 ✅ Architecture, core platform, teaching MVP
 
-## Phase 3 — Knowledge (in progress)
-- [x] knowledge_documents + knowledge_chunks (pgvector-ready)
+## Phase 3 — Knowledge
+- [x] knowledge_documents + knowledge_chunks
 - [x] Note ingestion UI
-- [x] Knowledge page in nav
-- [x] Keyword RAG retrieval injected into teacher
+- [x] Keyword RAG into teacher
 - [x] Vector search RPC (match_knowledge_chunks)
-- [ ] Embedding generation Edge Function
+- [x] embed-text Edge Function + note save wiring
 - [ ] Source citations in answers
 - [ ] PDF upload + parsing
 
-## Phase 4 — Voice (started)
-- [x] Browser STT (Web Speech API)
-- [x] Browser TTS (speechSynthesis)
-- [x] Mic + speak controls on Teaching page
-- [ ] Mixed-language voice prefs
-- [ ] Cloud STT/TTS provider abstraction
+## Phase 4 — Voice
+- [x] Browser STT / TTS on Teaching page
+- [ ] Mixed-language prefs / cloud providers
 
-## Phase 5 — Coding Agent (scaffold)
-- [x] Permission model + planCodingTask scaffold
-- [x] Coding page UI (plan under SAFE/ASSISTED/AUTONOMOUS)
-- [ ] Repository inspection UI
-- [ ] Code generation + modification
-- [ ] Sandbox execution
-- [ ] Build / test loop
+## Phase 5 — Coding Agent
+- [x] Permission model + planCodingTask
+- [x] Coding page UI
+- [x] Public GitHub repository inspection
+- [ ] Patch proposal + sandbox tests
+- [ ] Commit / PR (OAuth)
 
-## Phase 6 — GitHub
-- Connect repos, branches, commits, PRs, permission levels
+## Phase 6 — GitHub write path
+- OAuth, branches, commits, PRs with confirmation
 
 ## Phase 7 — Deployment
-- Preview / production deploy with approval + rollback
+- [x] DEPLOY.md + vercel.json
+- [ ] Production deploy approval automation
 
-## Phase 8 — Self-Improvement (started)
-- [x] experience_events table + recordExperience helper
-- [x] Log practice attempts as experience
-- [ ] Evaluation loops
-- [ ] Adaptive strategies from past outcomes
+## Phase 8 — Self-Improvement
+- [x] experience_events + attempt logging
+- [ ] Evaluation loops + adaptive strategies
