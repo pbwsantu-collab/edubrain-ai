@@ -12,6 +12,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
+import { upsertRevisionAfterAttempt } from '@/lib/learning/mastery';
 
 interface Example {
   id: string;
@@ -174,6 +175,15 @@ export function ConceptLearnPage() {
             last_assessed_at: new Date().toISOString(),
           });
         }
+      }
+
+      if (concept) {
+        await upsertRevisionAfterAttempt({
+          userId: user.id,
+          conceptKey: concept.concept_key || concept.id,
+          conceptId: concept.id,
+          correct: ok,
+        });
       }
     } catch (err) {
       console.error('[EDUBRAIN] Attempt save', err);
