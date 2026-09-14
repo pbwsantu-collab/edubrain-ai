@@ -1,0 +1,5 @@
+# EDUBRAIN AI — Supabase local config (optional)
+# Project settings are primarily managed in the Supabase dashboard.
+
+[functions.ai-chat]
+verify_jwt = true
