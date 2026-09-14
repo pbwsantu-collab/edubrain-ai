@@ -26,8 +26,11 @@ import {
 } from '@/lib/coding/githubInspect';
 import { cn } from '@/lib/utils';
 import { requestCodingPatch } from '@/lib/ai/chat';
+import { recordExperience } from '@/lib/learning/experience';
+import { useAuthStore } from '@/stores/authStore';
 
 export function CodingPage() {
+  const { user } = useAuthStore();
   const [goal, setGoal] = useState('Add a dark-mode toggle to the settings page');
   const [repoUrl, setRepoUrl] = useState('https://github.com/pbwsantu-collab/edubrain-ai');
   const [permission, setPermission] = useState<PermissionLevel>(() => {
@@ -56,7 +59,17 @@ export function CodingPage() {
     setFileContent(null);
     setPatchText(null);
     try {
-      setInspection(await inspectPublicRepo(repoUrl.trim()));
+      const result = await inspectPublicRepo(repoUrl.trim());
+      setInspection(result);
+      void recordExperience(user?.id, {
+        agent: 'coding',
+        eventType: 'inspect',
+        summary: result.error
+          ? `Inspect failed: ${result.error}`
+          : `Inspected ${result.fullName} (${result.tree?.length || 0} paths)`,
+        success: !result.error,
+        context: { repoUrl: repoUrl.trim(), fullName: result.fullName },
+      });
     } finally {
       setInspecting(false);
     }
@@ -83,9 +96,18 @@ export function CodingPage() {
               fileContent: result.content,
               permission,
             });
-            if (ai?.content) setPatchText(ai.content);
+            if (ai?.content) {
+              setPatchText(ai.content);
+              void recordExperience(user?.id, {
+                agent: 'coding',
+                eventType: 'patch',
+                summary: `Patch proposal for ${path}`,
+                success: true,
+                context: { path, goal: goal.trim().slice(0, 200), provider: ai.provider },
+              });
+            }
           } catch {
-            /* keep scaffold */
+            /* scaffold only */
           } finally {
             setPatchLoading(false);
           }
@@ -123,7 +145,7 @@ export function CodingPage() {
         <div className="flex gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
           <p className="text-amber-100/70">
-            Patches require deployed <code className="text-amber-200">ai-chat</code> + API key. Otherwise a scaffold proposal is shown. Nothing is written to the repo.
+            Patches need deployed <code className="text-amber-200">ai-chat</code> + API key. Nothing is written to the repo.
           </p>
         </div>
       </div>
@@ -209,9 +231,18 @@ export function CodingPage() {
           )}
           {(patchLoading || patchText) && (
             <div>
-              <div className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-slate-500">
-                Patch proposal (not applied)
+              <div className="mb-1 flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                <span>Patch proposal (not applied)</span>
                 {patchLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                {patchText && (
+                  <button
+                    type="button"
+                    className="ml-auto rounded border border-slate-700 px-2 py-0.5 text-[10px] normal-case tracking-normal text-slate-300 hover:border-brand-500 hover:text-brand-300"
+                    onClick={() => void navigator.clipboard.writeText(patchText)}
+                  >
+                    Copy
+                  </button>
+                )}
               </div>
               {patchText && (
                 <pre className="max-h-64 overflow-auto rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-[11px] text-amber-100/80 whitespace-pre-wrap">{patchText}</pre>
