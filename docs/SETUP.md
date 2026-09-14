@@ -16,8 +16,9 @@ npm install
    - `supabase/migrations/20260914000001_phase1_core.sql`
    - `supabase/migrations/20260914000002_phase2_curriculum.sql`
    - `supabase/migrations/20260914000003_phase2_mastery_revision.sql`
+   - `supabase/migrations/20260914000004_phase3_knowledge.sql`
 
-3. Confirm tables exist (profiles, subjects, curricula, concepts, exercises, revision_items, …).
+3. Confirm tables exist.
 4. Copy **Project URL** and **anon public** key from Settings → API.
 
 ## 3. Frontend env
@@ -38,23 +39,20 @@ cd apps/web
 npm run dev
 ```
 
-Open http://localhost:5173 — sign up, then try **Teach**, **Curriculum**, and practice MCQs.
-
-Without an AI provider, the local heuristic teacher still responds.
+Open http://localhost:5173 — Teach, Curriculum, Knowledge, practice MCQs.
 
 ## 5. Optional: real AI (Edge Function)
 
 ```bash
 supabase functions deploy ai-chat
 supabase secrets set OPENAI_API_KEY=sk-...
-# or ANTHROPIC_API_KEY
 ```
 
 ## 6. Deploy frontend (Vercel)
 
 - Import the GitHub repo on Vercel
-- Root uses `vercel.json` (builds `apps/web`)
-- Set env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- Root uses `vercel.json`
+- Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
 
 ## 7. Security notes
 

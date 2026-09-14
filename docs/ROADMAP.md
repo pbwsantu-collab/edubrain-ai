@@ -27,22 +27,24 @@
 - [ ] E2E verification with live Supabase project
 
 ## Phase 2 — Teaching Engine (complete for MVP)
-- [x] Curriculum hierarchy schema (curricula → units → chapters → topics → concepts)
+- [x] Curriculum hierarchy schema
 - [x] Exercises + attempts tables
 - [x] Sample Class XI Physics seed
-- [x] Curriculum list UI
-- [x] Curriculum detail / topic view
-- [x] Concept learn page + MCQ exercise UI + mastery update
+- [x] Curriculum list + detail UI
+- [x] Concept learn page + MCQ + mastery update
 - [x] Adaptive recommendations (weak + due)
-- [x] Spaced revision schedule (SM-2 style revision_items)
-- [x] More subject seeds (Math fractions, Chem atoms)
+- [x] Spaced revision (SM-2 style)
+- [x] Math + Chem seeds
 - [x] Mastery panel on dashboard
 
-## Phase 3 — Knowledge
-- PDF / document ingestion
-- Chunking + embeddings
-- Semantic search (RAG)
-- Source tracking
+## Phase 3 — Knowledge (started)
+- [x] knowledge_documents + knowledge_chunks schema (pgvector-ready)
+- [x] Note ingestion UI (text notes → chunks)
+- [x] Knowledge page in nav
+- [ ] PDF upload + parsing
+- [ ] Embedding pipeline
+- [ ] Semantic search (RAG) in teacher agent
+- [ ] Source citations in answers
 
 ## Phase 4 — Voice
 - STT provider
