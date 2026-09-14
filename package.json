@@ -1,0 +1,21 @@
+{
+  "name": "edubrain-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EDUBRAIN AI — Universal AI Teacher + Self-Improving AI Developer",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspace=apps/web",
+    "lint": "npm run lint --workspace=apps/web",
+    "typecheck": "npm run typecheck --workspace=apps/web"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "EDUBRAIN AI",
+  "license": "UNLICENSED"
+}
