@@ -26,12 +26,16 @@
 - [ ] Deploy preview
 - [ ] E2E verification with live Supabase project
 
-## Phase 2 — Teaching Engine
-- Curriculum hierarchy
-- Lessons, questions, assessments
-- Mastery tracking UI
-- Adaptive lesson recommendations
-- Spaced revision schedule
+## Phase 2 — Teaching Engine (started)
+- [x] Curriculum hierarchy schema (curricula → units → chapters → topics → concepts)
+- [x] Exercises + attempts tables
+- [x] Sample Class XI Physics seed
+- [x] Curriculum list UI
+- [ ] Curriculum detail / topic view
+- [ ] Lesson player + exercise UI
+- [ ] Mastery tracking UI
+- [ ] Adaptive recommendations
+- [ ] Spaced revision schedule
 
 ## Phase 3 — Knowledge
 - PDF / document ingestion

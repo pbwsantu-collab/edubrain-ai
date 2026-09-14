@@ -7,6 +7,7 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { TeachingPage } from '@/features/teaching/TeachingPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { CurriculumPage } from '@/features/curriculum/CurriculumPage';
 import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 
@@ -68,6 +69,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="teach" element={<TeachingPage />} />
           <Route path="teach/:conversationId" element={<TeachingPage />} />
+          <Route path="curriculum" element={<CurriculumPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
