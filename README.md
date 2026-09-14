@@ -8,7 +8,7 @@ Universal AI Teacher + Self-Improving AI Developer platform.
 
 ## Status
 
-**Phase 1 in progress** — Core platform scaffold, authentication, dashboard, AI chat, basic memory, Supabase, responsive PWA.
+**Phase 1 largely complete** — Auth, dashboard, teaching chat, Supabase schema, AI Edge Function + local fallback, PWA shell. See [docs/SETUP.md](docs/SETUP.md).
 
 ## Architecture Overview
 
@@ -31,62 +31,21 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design.
 | PWA          | Vite PWA plugin + Service Worker    |
 | Backend/Data | Supabase (Auth, Postgres, pgvector) |
 | State        | Zustand + TanStack Query            |
-| AI           | Provider abstraction layer          |
+| AI           | Provider abstraction + Edge Function |
 | Speech       | STT / TTS provider abstraction      |
 
-## Project Structure
+## Getting Started
 
-```
-edubrain-ai/
-├── apps/web/                 # Vite + React PWA
-├── packages/
-│   ├── shared/               # Shared types & schemas
-│   ├── agents/               # Agent definitions
-│   ├── core/                 # Permission, evaluation, loops
-│   └── providers/            # AI / Speech interfaces
-├── supabase/                 # Migrations, Edge Functions
-├── docs/                     # Architecture & design docs
-└── scripts/
-```
-
-## Development Phases
-
-1. **Phase 1** (current) — Auth, dashboard, AI chat, basic memory, PWA
-2. **Phase 2** — Curriculum, lessons, assessment, adaptive learning
-3. **Phase 3** — Document ingestion, knowledge base, RAG
-4. **Phase 4** — Voice (STT + TTS), conversational teaching
-5. **Phase 5** — Coding agent, sandbox, test loop
-6. **Phase 6** — GitHub integration
-7. **Phase 7** — Controlled deployment
-8. **Phase 8** — Experience-based self-improvement
-
-## Getting Started (Phase 1)
+See **[docs/SETUP.md](docs/SETUP.md)** for full instructions.
 
 ```bash
-# Clone
 git clone https://github.com/pbwsantu-collab/edubrain-ai.git
 cd edubrain-ai
-
-# Install (from root)
 npm install
-
-# Set up environment
 cp apps/web/.env.example apps/web/.env.local
-# Fill in Supabase URL + anon key
-
-# Run web app
-cd apps/web
-npm run dev
+# Add Supabase URL + anon key, run migration SQL
+cd apps/web && npm run dev
 ```
-
-## Non-Negotiable Rules
-
-- Never fabricate APIs or claim tests passed without evidence
-- Never expose secrets in frontend
-- Never destroy files without authorization
-- Always inspect existing architecture before major changes
-- Prefer simple, reliable architecture
-- Security over autonomy
 
 ## License
 

@@ -112,12 +112,12 @@ export function SettingsPage() {
         <ul className="mt-3 space-y-1.5 text-sm text-slate-400">
           <li>• Authentication & profiles</li>
           <li>• Dashboard & subject list</li>
-          <li>• Teaching chat (local teacher + conversation persistence)</li>
+          <li>• Teaching chat (AI Edge Function + local fallback)</li>
           <li>• Basic mastery table ready</li>
           <li>• PWA shell</li>
         </ul>
         <p className="mt-3 text-xs text-slate-600">
-          Voice, full LLM providers, curriculum, coding agent arrive in later phases.
+          Voice, full curriculum, coding agent arrive in later phases. See docs/SETUP.md.
         </p>
       </div>
     </div>
