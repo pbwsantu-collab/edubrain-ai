@@ -11,6 +11,7 @@ import { CurriculumPage } from '@/features/curriculum/CurriculumPage';
 import { CurriculumDetailPage } from '@/features/curriculum/CurriculumDetailPage';
 import { ConceptLearnPage } from '@/features/curriculum/ConceptLearnPage';
 import { KnowledgePage } from '@/features/knowledge/KnowledgePage';
+import { CodingPage } from '@/features/coding/CodingPage';
 import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="curriculum/:slug" element={<CurriculumDetailPage />} />
           <Route path="learn/:conceptId" element={<ConceptLearnPage />} />
           <Route path="knowledge" element={<KnowledgePage />} />
+          <Route path="coding" element={<CodingPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
