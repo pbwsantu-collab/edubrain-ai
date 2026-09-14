@@ -58,9 +58,7 @@ export async function inspectPublicRepo(repoUrl: string): Promise<RepoInspection
   };
 
   try {
-    const metaRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-      headers,
-    });
+    const metaRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
     if (metaRes.status === 404) {
       return {
         fullName: `${owner}/${repo}`,
@@ -97,11 +95,7 @@ export async function inspectPublicRepo(repoUrl: string): Promise<RepoInspection
     let tree: RepoTreeEntry[] = [];
     if (treeRes.ok) {
       const treeJson = await treeRes.json();
-      const entries = (treeJson.tree || []) as Array<{
-        path: string;
-        type: string;
-        size?: number;
-      }>;
+      const entries = (treeJson.tree || []) as Array<{ path: string; type: string; size?: number }>;
       tree = entries
         .filter((e) => e.type === 'blob' || e.type === 'tree')
         .slice(0, 400)
@@ -113,9 +107,7 @@ export async function inspectPublicRepo(repoUrl: string): Promise<RepoInspection
     }
 
     let packageJson: RepoInspection['packageJson'] = null;
-    const pkgEntry = tree.find(
-      (t) => t.path === 'package.json' || t.path.endsWith('/package.json')
-    );
+    const pkgEntry = tree.find((t) => t.path === 'package.json' || t.path.endsWith('/package.json'));
     if (pkgEntry) {
       const path = pkgEntry.path === 'package.json' ? 'package.json' : pkgEntry.path;
       const rawRes = await fetch(
@@ -155,13 +147,11 @@ export async function inspectPublicRepo(repoUrl: string): Promise<RepoInspection
 }
 
 export function summarizeTree(tree: RepoTreeEntry[], limit = 40): string[] {
-  const interesting = tree
+  return tree
     .filter((t) => t.type === 'blob')
     .filter((t) => {
       const p = t.path.toLowerCase();
-      if (p.includes('node_modules') || p.includes('dist/') || p.includes('.git/')) {
-        return false;
-      }
+      if (p.includes('node_modules') || p.includes('dist/') || p.includes('.git/')) return false;
       return (
         p.endsWith('.ts') ||
         p.endsWith('.tsx') ||
@@ -178,5 +168,66 @@ export function summarizeTree(tree: RepoTreeEntry[], limit = 40): string[] {
     })
     .map((t) => t.path)
     .slice(0, limit);
-  return interesting;
+}
+
+export async function readPublicFile(
+  repoUrl: string,
+  filePath: string,
+  branch?: string
+): Promise<{ path: string; content: string; error?: string }> {
+  const parsed = parseGithubUrl(repoUrl);
+  if (!parsed) {
+    return { path: filePath, content: '', error: 'Invalid GitHub URL' };
+  }
+
+  const b = branch || 'main';
+  const url = `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${b}/${filePath.replace(/^\//, '')}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      if (b === 'main') {
+        const res2 = await fetch(
+          `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/master/${filePath.replace(/^\//, '')}`
+        );
+        if (res2.ok) {
+          const content = await res2.text();
+          return { path: filePath, content: content.slice(0, 200_000) };
+        }
+      }
+      return { path: filePath, content: '', error: `HTTP ${res.status}` };
+    }
+    const content = await res.text();
+    return { path: filePath, content: content.slice(0, 200_000) };
+  } catch (err) {
+    return {
+      path: filePath,
+      content: '',
+      error: err instanceof Error ? err.message : 'Read failed',
+    };
+  }
+}
+
+export function proposeSimplePatch(
+  path: string,
+  original: string,
+  instruction: string
+): { path: string; summary: string; unifiedDiff: string } {
+  const lines = original.split('\n');
+  const preview = lines.slice(0, 40).join('\n');
+  const summary = `Proposed change for ${path}: ${instruction.slice(0, 200)}`;
+  const unifiedDiff = [
+    `--- a/${path}`,
+    `+++ b/${path}`,
+    `@@ note @@`,
+    `# EDUBRAIN patch proposal (SAFE mode — not applied)`,
+    `# Goal: ${instruction.replace(/\n/g, ' ').slice(0, 180)}`,
+    `#`,
+    `# Current file preview (${Math.min(lines.length, 40)} / ${lines.length} lines):`,
+    ...preview.split('\n').map((l) => ` ${l}`),
+    `#`,
+    `# Next: wire Coding Agent LLM to emit a real unified diff for review.`,
+  ].join('\n');
+
+  return { path, summary, unifiedDiff };
 }
