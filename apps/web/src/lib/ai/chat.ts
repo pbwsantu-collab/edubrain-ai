@@ -11,21 +11,36 @@ export interface AIChatResult {
   usedFallback: boolean;
 }
 
-/**
- * Call the ai-chat Edge Function.
- * Falls back to null on network/config errors so the UI can use the local teacher.
- */
+export interface TeacherRequestOptions {
+  subject?: string | null;
+  knowledgeContext?: string | null;
+}
+
 export async function requestTeacherReply(
   messages: ChatMessage[],
-  subject?: string | null
+  options: TeacherRequestOptions | string | null = {}
 ): Promise<AIChatResult | null> {
+  const opts: TeacherRequestOptions =
+    typeof options === 'string' || options === null
+      ? { subject: options }
+      : options;
+
   try {
+    const payloadMessages = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant' || m.role === 'system')
+      .map((m) => ({ role: m.role, content: m.content }));
+
+    if (opts.knowledgeContext?.trim()) {
+      payloadMessages.unshift({
+        role: 'system',
+        content: opts.knowledgeContext.trim(),
+      });
+    }
+
     const { data, error } = await supabase.functions.invoke('ai-chat', {
       body: {
-        messages: messages
-          .filter((m) => m.role === 'user' || m.role === 'assistant')
-          .map((m) => ({ role: m.role, content: m.content })),
-        subject: subject || undefined,
+        messages: payloadMessages,
+        subject: opts.subject || undefined,
       },
     });
 
