@@ -1,0 +1,9 @@
+-- EDUBRAIN AI — PART 1
+-- Run these three files first (GitHub → Raw → copy → SQL Editor):
+--
+-- 1. https://github.com/pbwsantu-collab/edubrain-ai/blob/main/supabase/migrations/20260914000001_phase1_core.sql
+-- 2. https://github.com/pbwsantu-collab/edubrain-ai/blob/main/supabase/migrations/20260914000002_phase2_curriculum.sql
+-- 3. https://github.com/pbwsantu-collab/edubrain-ai/blob/main/supabase/migrations/20260914000003_phase2_mastery_revision.sql
+--
+-- Then run:
+-- https://github.com/pbwsantu-collab/edubrain-ai/blob/main/supabase/ALL_MIGRATIONS_PART2.sql
