@@ -15,8 +15,9 @@ npm install
 
    - `supabase/migrations/20260914000001_phase1_core.sql`
    - `supabase/migrations/20260914000002_phase2_curriculum.sql`
+   - `supabase/migrations/20260914000003_phase2_mastery_revision.sql`
 
-3. Confirm tables exist (profiles, subjects, curricula, concepts, exercises, …).
+3. Confirm tables exist (profiles, subjects, curricula, concepts, exercises, revision_items, …).
 4. Copy **Project URL** and **anon public** key from Settings → API.
 
 ## 3. Frontend env
@@ -37,7 +38,7 @@ cd apps/web
 npm run dev
 ```
 
-Open http://localhost:5173 — sign up, then try **Teach** and **Curriculum**.
+Open http://localhost:5173 — sign up, then try **Teach**, **Curriculum**, and practice MCQs.
 
 Without an AI provider, the local heuristic teacher still responds.
 

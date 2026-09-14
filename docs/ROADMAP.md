@@ -26,16 +26,17 @@
 - [ ] Deploy preview
 - [ ] E2E verification with live Supabase project
 
-## Phase 2 — Teaching Engine (in progress)
+## Phase 2 — Teaching Engine (complete for MVP)
 - [x] Curriculum hierarchy schema (curricula → units → chapters → topics → concepts)
 - [x] Exercises + attempts tables
 - [x] Sample Class XI Physics seed
 - [x] Curriculum list UI
 - [x] Curriculum detail / topic view
 - [x] Concept learn page + MCQ exercise UI + mastery update
-- [ ] Adaptive recommendations
-- [ ] Spaced revision schedule
-- [ ] More subject seeds
+- [x] Adaptive recommendations (weak + due)
+- [x] Spaced revision schedule (SM-2 style revision_items)
+- [x] More subject seeds (Math fractions, Chem atoms)
+- [x] Mastery panel on dashboard
 
 ## Phase 3 — Knowledge
 - PDF / document ingestion
