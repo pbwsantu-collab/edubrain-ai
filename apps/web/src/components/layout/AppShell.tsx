@@ -5,6 +5,7 @@ import {
   Settings,
   BookOpen,
   BookMarked,
+  Code2,
   LogOut,
   Brain,
   Menu,
@@ -19,6 +20,7 @@ const navItems = [
   { to: '/teach', label: 'Teach', icon: MessageSquare },
   { to: '/curriculum', label: 'Curriculum', icon: BookOpen },
   { to: '/knowledge', label: 'Knowledge', icon: BookMarked },
+  { to: '/coding', label: 'Coding', icon: Code2 },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
