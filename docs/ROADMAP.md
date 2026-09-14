@@ -10,7 +10,7 @@
 - Permission model
 - This roadmap
 
-## Phase 1 — Core Platform (in progress)
+## Phase 1 — Core Platform (largely complete)
 - [x] Monorepo scaffold
 - [x] Vite + React + TypeScript + Tailwind
 - [x] PWA manifest + service worker
@@ -22,8 +22,9 @@
 - [x] Basic mastery table
 - [x] Subjects seed
 - [x] RLS policies
-- [ ] Wire real AI provider via Edge Function
+- [x] AI Edge Function (OpenAI/Anthropic) + client fallback
 - [ ] Deploy preview
+- [ ] E2E verification with live Supabase project
 
 ## Phase 2 — Teaching Engine
 - Curriculum hierarchy
