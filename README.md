@@ -4,45 +4,49 @@
 
 Universal AI Teacher + Self-Improving AI Developer platform.
 
-## Status
+## Live setup (your Supabase)
 
-| Phase | Status |
-|-------|--------|
-| **0 Architecture** | Complete |
-| **1 Core platform** | Complete |
-| **2 Teaching engine** | MVP complete |
-| **3 Knowledge** | RAG keyword + vector RPC; note ingestion |
-| **4 Voice** | Browser mic + TTS on Teach |
-| **5 Coding** | Plan UI (SAFE/ASSISTED/AUTONOMOUS) |
-| **8 Experience** | experience_events + attempt logging |
-| 6–7 GitHub / Deploy execution | Planned |
+| Item | Value |
+|------|--------|
+| Project | `edubrain-ai` |
+| Ref | `qpihivtitywtoxjedyrk` |
+| Region | Mumbai (`ap-south-1`) |
+| URL | `https://qpihivtitywtoxjedyrk.supabase.co` |
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/SETUP.md`](docs/SETUP.md).
+1. Run SQL migrations — see [`docs/APPLY_MIGRATIONS.md`](docs/APPLY_MIGRATIONS.md)
+2. Create `apps/web/.env.local` with `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
+3. `cd apps/web && npm install && npm run dev`
+4. Optional: deploy `ai-chat` + `embed-text` Edge Functions
 
 ## What works today
 
-- Email auth + profiles (Supabase)
-- Teaching chat (Edge Function AI + local fallback)
-- Curriculum (Physics / Math / Chemistry demos)
-- Concept pages + MCQ + mastery + spaced revision
-- Dashboard recommendations
-- Knowledge notes + keyword RAG into teacher
-- Browser voice (mic + speak)
-- Coding agent plan UI with permission modes
-- Experience event logging on practice attempts
-- PWA shell + Vercel config
+| Feature | Status |
+|---------|--------|
+| Auth (email) + profiles | ✅ |
+| Dashboard + mastery + experience panel | ✅ |
+| Teaching chat (Edge AI + local fallback) | ✅ |
+| Knowledge notes + .txt/.md upload + RAG | ✅ |
+| Vector retrieve when embeddings exist | ✅ |
+| Curriculum + MCQ + spaced revision | ✅ |
+| English Present Perfect seed | ✅ |
+| Browser voice (STT/TTS) | ✅ |
+| Coding: inspect public GitHub + read file | ✅ |
+| Coding: LLM patch **proposal** (not applied) | ✅ |
+| SAFE / ASSISTED / AUTONOMOUS permissions | ✅ |
+| Auto-commit / auto-deploy | ❌ by design |
 
-## Quick start
+## Docs
 
-```bash
-git clone https://github.com/pbwsantu-collab/edubrain-ai.git
-cd edubrain-ai && npm install
-# Run all SQL migrations in Supabase SQL editor (docs/SETUP.md)
-cp apps/web/.env.example apps/web/.env.local
-# Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
-cd apps/web && npm run dev
-```
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- [`docs/SETUP.md`](docs/SETUP.md)
+- [`docs/DEPLOY.md`](docs/DEPLOY.md)
+- [`docs/APPLY_MIGRATIONS.md`](docs/APPLY_MIGRATIONS.md)
+- [`docs/ROADMAP.md`](docs/ROADMAP.md)
 
-## Repo
+## Tech stack
 
-https://github.com/pbwsantu-collab/edubrain-ai
+React 19 · TypeScript · Vite · Tailwind · Supabase (Auth, Postgres, RLS, pgvector, Edge Functions) · PWA
+
+## Safety principle
+
+Controlled self-improvement via memory, retrieval, evaluation, and experience — **not** silent model retraining or autonomous deploy.

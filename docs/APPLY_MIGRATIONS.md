@@ -1,19 +1,15 @@
-# Apply migrations to your Supabase project
+# Apply migrations — project `qpihivtitywtoxjedyrk`
 
-## 1. Open SQL Editor
+## SQL Editor
 
-Dashboard → your project → **SQL** → **New query**
-
-For project ref `qpihivtitywtoxjedyrk`:
 https://supabase.com/dashboard/project/qpihivtitywtoxjedyrk/sql/new
 
-## 2. Run SQL (choose one)
+## Fast path (2 pastes)
 
-**Option A — one file**
+1. [ALL_MIGRATIONS_PART1.sql](https://github.com/pbwsantu-collab/edubrain-ai/blob/main/supabase/ALL_MIGRATIONS_PART1.sql) → Raw → copy → Run
+2. [ALL_MIGRATIONS_PART2.sql](https://github.com/pbwsantu-collab/edubrain-ai/blob/main/supabase/ALL_MIGRATIONS_PART2.sql) → Raw → copy → Run
 
-Open [`supabase/ALL_MIGRATIONS.sql`](../supabase/ALL_MIGRATIONS.sql) on GitHub → raw → copy all → paste → **Run**.
-
-**Option B — six files in order**
+## Or six individual files (order matters)
 
 1. `20260914000001_phase1_core.sql`
 2. `20260914000002_phase2_curriculum.sql`
@@ -22,26 +18,18 @@ Open [`supabase/ALL_MIGRATIONS.sql`](../supabase/ALL_MIGRATIONS.sql) on GitHub �
 5. `20260914000005_phase3_vector_and_experience.sql`
 6. `20260914000006_english_curriculum.sql`
 
-Most statements use `if not exists` / `on conflict`. Safe to re-run if a step partially failed.
-
-## 3. Frontend env
-
-`apps/web/.env.local`:
+## Frontend
 
 ```env
 VITE_SUPABASE_URL=https://qpihivtitywtoxjedyrk.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_ANON_KEY=<Project Settings → API → anon public>
 ```
-
-Get the anon key: Project Settings → API.
-
-## 4. Run locally
 
 ```bash
 cd apps/web && npm install && npm run dev
 ```
 
-## 5. Optional AI
+## Optional AI
 
 ```bash
 supabase link --project-ref qpihivtitywtoxjedyrk
@@ -49,7 +37,3 @@ supabase functions deploy ai-chat
 supabase functions deploy embed-text
 supabase secrets set OPENAI_API_KEY=sk-...
 ```
-
-## 6. Auth
-
-Authentication → Providers → enable **Email**.
