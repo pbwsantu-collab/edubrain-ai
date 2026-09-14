@@ -1,7 +1,7 @@
 // EDUBRAIN AI — ai-chat Edge Function
 // Proxies chat to a configured AI provider. Secrets stay server-side.
 // Deploy: supabase functions deploy ai-chat
-// Secrets: OPENAI_API_KEY or ANTHROPIC_API_KEY (set via supabase secrets)
+// Secrets: OPENAI_API_KEY or ANTHROPIC_API_KEY
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -23,6 +23,15 @@ const TEACHER_SYSTEM = `You are EDUBRAIN AI — a patient, clear, adaptive teach
 - You do not have unrestricted autonomy; you teach and guide.
 - Never claim a fact you are unsure about; say when you are uncertain.`;
 
+const CODING_SYSTEM = `You are EDUBRAIN Coding Agent in SAFE/ASSISTED mode.
+- Propose a minimal code change for the user's goal.
+- Prefer a unified diff (--- a/path, +++ b/path, @@ hunks) when possible.
+- If a full diff is hard, show the revised function/section clearly.
+- Do not claim the change was applied or deployed.
+- Do not invent private APIs.
+- Keep the response under 1200 words.
+- Safety: never suggest destructive git commands or force-push.`;
+
 type ChatMessage = { role: string; content: string };
 
 async function callOpenAI(messages: ChatMessage[], apiKey: string) {
@@ -35,20 +44,19 @@ async function callOpenAI(messages: ChatMessage[], apiKey: string) {
     body: JSON.stringify({
       model: Deno.env.get("AI_MODEL") || "gpt-4o-mini",
       messages,
-      temperature: 0.7,
-      max_tokens: 1024,
+      temperature: 0.4,
     }),
   });
   if (!res.ok) {
     const t = await res.text();
-    throw new Error(`OpenAI error ${res.status}: ${t}`);
+    throw new Error(`OpenAI ${res.status}: ${t}`);
   }
   const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "";
+  return data.choices?.[0]?.message?.content || "";
 }
 
 async function callAnthropic(messages: ChatMessage[], apiKey: string) {
-  const system = messages.find((m) => m.role === "system")?.content || TEACHER_SYSTEM;
+  const system = messages.find((m) => m.role === "system")?.content || "";
   const filtered = messages.filter((m) => m.role !== "system");
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -58,8 +66,8 @@ async function callAnthropic(messages: ChatMessage[], apiKey: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: Deno.env.get("AI_MODEL") || "claude-3-5-haiku-latest",
-      max_tokens: 1024,
+      model: Deno.env.get("AI_MODEL") || "claude-3-5-haiku-20241022",
+      max_tokens: 2048,
       system,
       messages: filtered.map((m) => ({
         role: m.role === "assistant" ? "assistant" : "user",
@@ -69,10 +77,10 @@ async function callAnthropic(messages: ChatMessage[], apiKey: string) {
   });
   if (!res.ok) {
     const t = await res.text();
-    throw new Error(`Anthropic error ${res.status}: ${t}`);
+    throw new Error(`Anthropic ${res.status}: ${t}`);
   }
   const data = await res.json();
-  return data.content?.[0]?.text ?? "";
+  return data.content?.[0]?.text || "";
 }
 
 serve(async (req) => {
@@ -83,7 +91,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Missing authorization" }), {
+      return new Response(JSON.stringify({ error: "Missing Authorization" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -95,7 +103,10 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -106,15 +117,19 @@ serve(async (req) => {
     const body = await req.json();
     const userMessages: ChatMessage[] = body.messages || [];
     const subject = body.subject as string | undefined;
+    const mode = (body.mode as string | undefined) || "teacher";
+
+    const systemContent =
+      mode === "coding"
+        ? CODING_SYSTEM
+        : TEACHER_SYSTEM +
+          (subject ? `\nThe student is currently focusing on: ${subject}.` : "");
 
     const messages: ChatMessage[] = [
-      {
-        role: "system",
-        content:
-          TEACHER_SYSTEM +
-          (subject ? `\nThe student is currently focusing on: ${subject}.` : ""),
-      },
-      ...userMessages.filter((m) => m.role === "user" || m.role === "assistant"),
+      { role: "system", content: systemContent },
+      ...userMessages.filter(
+        (m) => m.role === "user" || m.role === "assistant" || m.role === "system"
+      ),
     ];
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
@@ -151,6 +166,7 @@ serve(async (req) => {
         content,
         provider,
         user_id: user.id,
+        mode,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
