@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MasteryPanel } from '@/features/dashboard/MasteryPanel';
+import { ExperiencePanel } from '@/features/dashboard/ExperiencePanel';
 import {
   BookOpen,
   MessageSquare,
@@ -52,12 +53,12 @@ export function DashboardPage() {
     <div className="mx-auto max-w-6xl space-y-8 p-4 sm:p-6 lg:p-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">{greeting}</h1>
-        <p className="mt-1 text-slate-400">
-          Learn. Remember. Teach. Build. Improve.
-        </p>
+        <p className="mt-1 text-slate-400">Learn. Remember. Teach. Build. Improve.</p>
       </div>
 
       <MasteryPanel />
+
+      <ExperiencePanel />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
@@ -88,15 +89,19 @@ export function DashboardPage() {
           <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-400" />
         </Link>
 
-        <div className="card flex items-start gap-4 p-5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-400">
+        <Link
+          to="/coding"
+          className="card group flex items-start gap-4 p-5 transition-all hover:border-brand-500/40 hover:bg-slate-900"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600/20 text-brand-400 transition-colors group-hover:bg-brand-600 group-hover:text-white">
             <Target className="h-5 w-5" />
           </div>
-          <div>
-            <div className="font-semibold text-slate-300">Goals</div>
-            <p className="mt-0.5 text-sm text-slate-500">Coming in a later phase</p>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-white">Coding agent</div>
+            <p className="mt-0.5 text-sm text-slate-400">Inspect repos and plan safely</p>
           </div>
-        </div>
+          <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-400" />
+        </Link>
       </div>
 
       {!loading && subjects.length > 0 && (
