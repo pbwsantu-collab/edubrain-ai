@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { MasteryPanel } from '@/features/dashboard/MasteryPanel';
 import {
   BookOpen,
   MessageSquare,
@@ -24,14 +25,18 @@ export function DashboardPage() {
         const [subjectsRes, masteryRes] = await Promise.all([
           supabase.from('subjects').select('*').eq('is_active', true).order('name'),
           user
-            ? supabase.from('mastery').select('*').eq('user_id', user.id).limit(20)
-            : Promise.resolve({ data: [] }),
+            ? supabase
+                .from('mastery')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('score', { ascending: true })
+                .limit(5)
+            : Promise.resolve({ data: [] as Mastery[] }),
         ]);
-
-        if (subjectsRes.data) setSubjects(subjectsRes.data);
-        if (masteryRes.data) setMastery(masteryRes.data);
+        setSubjects(subjectsRes.data || []);
+        setMastery((masteryRes.data as Mastery[]) || []);
       } catch (err) {
-        console.error('[EDUBRAIN] Dashboard load error', err);
+        console.error('[EDUBRAIN] Dashboard load', err);
       } finally {
         setLoading(false);
       }
@@ -39,26 +44,20 @@ export function DashboardPage() {
     load();
   }, [user]);
 
-  const greeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
-  const avgMastery =
-    mastery.length > 0
-      ? Math.round((mastery.reduce((s, m) => s + Number(m.score), 0) / mastery.length) * 100)
-      : null;
+  const greeting = profile?.display_name
+    ? `Welcome back, ${profile.display_name}`
+    : 'Welcome to EDUBRAIN';
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 p-4 sm:p-6 lg:p-8">
-      <div className="animate-fade-in">
-        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          {greeting()}, {profile?.display_name || 'Learner'}
-        </h1>
-        <p className="mt-1 text-slate-400">Ready to learn something new today?</p>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">{greeting}</h1>
+        <p className="mt-1 text-slate-400">
+          Learn. Remember. Teach. Build. Improve.
+        </p>
       </div>
+
+      <MasteryPanel />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
@@ -69,106 +68,81 @@ export function DashboardPage() {
             <MessageSquare className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-semibold text-white">Start Teaching Session</div>
-            <p className="mt-0.5 text-sm text-slate-400">
-              Chat with your AI teacher about any subject
-            </p>
+            <div className="font-semibold text-white">Start teaching session</div>
+            <p className="mt-0.5 text-sm text-slate-400">Ask anything — adaptive AI tutor</p>
           </div>
           <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-400" />
         </Link>
 
-        <div className="card flex items-start gap-4 p-5 opacity-60">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-400">
+        <Link
+          to="/curriculum"
+          className="card group flex items-start gap-4 p-5 transition-all hover:border-brand-500/40 hover:bg-slate-900"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600/20 text-brand-400 transition-colors group-hover:bg-brand-600 group-hover:text-white">
             <BookOpen className="h-5 w-5" />
           </div>
-          <div>
-            <div className="font-semibold text-slate-300">Curriculum</div>
-            <p className="mt-0.5 text-sm text-slate-500">Coming in Phase 2</p>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-white">Curriculum</div>
+            <p className="mt-0.5 text-sm text-slate-400">Structured courses and concepts</p>
           </div>
-        </div>
+          <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-400" />
+        </Link>
 
-        <div className="card flex items-start gap-4 p-5 opacity-60">
+        <div className="card flex items-start gap-4 p-5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-400">
-            <Sparkles className="h-5 w-5" />
+            <Target className="h-5 w-5" />
           </div>
           <div>
-            <div className="font-semibold text-slate-300">Voice Tutor</div>
-            <p className="mt-0.5 text-sm text-slate-500">Coming in Phase 4</p>
+            <div className="font-semibold text-slate-300">Goals</div>
+            <p className="mt-0.5 text-sm text-slate-500">Coming in a later phase</p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="card p-5">
-          <div className="flex items-center gap-2 text-slate-400">
-            <Target className="h-4 w-4" />
-            <span className="text-xs font-medium uppercase tracking-wider">Subjects</span>
-          </div>
-          <div className="mt-2 text-2xl font-bold text-white">
-            {loading ? '\u2014' : subjects.length}
-          </div>
-        </div>
-        <div className="card p-5">
-          <div className="flex items-center gap-2 text-slate-400">
-            <TrendingUp className="h-4 w-4" />
-            <span className="text-xs font-medium uppercase tracking-wider">Avg Mastery</span>
-          </div>
-          <div className="mt-2 text-2xl font-bold text-white">
-            {loading ? '\u2014' : avgMastery !== null ? `${avgMastery}%` : '\u2014'}
-          </div>
-        </div>
-        <div className="card p-5">
-          <div className="flex items-center gap-2 text-slate-400">
-            <BookOpen className="h-4 w-4" />
-            <span className="text-xs font-medium uppercase tracking-wider">Concepts Tracked</span>
-          </div>
-          <div className="mt-2 text-2xl font-bold text-white">
-            {loading ? '\u2014' : mastery.length}
-          </div>
-        </div>
-      </div>
-
-      <section>
-        <h2 className="mb-4 text-lg font-semibold text-white">Available Subjects</h2>
-        {loading ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card h-24 animate-pulse bg-slate-900/40" />
-            ))}
-          </div>
-        ) : subjects.length === 0 ? (
-          <div className="card p-8 text-center">
-            <p className="text-slate-400">
-              No subjects loaded yet. Seed the database or they will appear after migration.
-            </p>
-            <Link to="/teach" className="btn-primary mt-4 inline-flex">
-              Start a free-form session
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {subjects.map((subject) => (
+      {!loading && subjects.length > 0 && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+            <Sparkles className="h-4 w-4 text-brand-400" />
+            Subjects
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {subjects.map((s) => (
               <Link
-                key={subject.id}
-                to={`/teach?subject=${subject.slug}`}
-                className="card group flex items-center gap-4 p-4 transition-all hover:border-brand-500/30 hover:bg-slate-900"
+                key={s.id}
+                to={`/teach?subject=${encodeURIComponent(s.slug)}`}
+                className="card flex items-center gap-3 p-4 transition-all hover:border-brand-500/40 hover:bg-slate-900"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-lg">
-                  {subject.icon || '\ud83d\udcda'}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-white group-hover:text-brand-300">
-                    {subject.name}
-                  </div>
-                  {subject.description && (
-                    <p className="truncate text-xs text-slate-500">{subject.description}</p>
+                <span className="text-xl">{s.icon || '📚'}</span>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium text-white">{s.name}</div>
+                  {s.description && (
+                    <div className="truncate text-xs text-slate-500">{s.description}</div>
                   )}
                 </div>
               </Link>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
+
+      {!loading && mastery.length > 0 && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+            <TrendingUp className="h-4 w-4 text-brand-400" />
+            Recent mastery
+          </h2>
+          <div className="card divide-y divide-slate-800">
+            {mastery.map((m) => (
+              <div key={m.id} className="flex items-center justify-between px-4 py-3 text-sm">
+                <span className="truncate text-slate-300">{m.concept_key}</span>
+                <span className="ml-3 shrink-0 text-slate-500">
+                  {Math.round(Number(m.score) * 100)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
