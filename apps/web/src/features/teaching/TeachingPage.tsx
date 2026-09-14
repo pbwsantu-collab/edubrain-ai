@@ -4,6 +4,7 @@ import { Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { requestTeacherReply } from '@/lib/ai/chat';
 
 interface ChatMessage {
   id: string;
@@ -64,7 +65,6 @@ export function TeachingPage() {
     });
   };
 
-  /** Phase 1 local heuristic teacher. Full LLM via Edge Function comes next. */
   const generateLocalTeacherReply = (userText: string): string => {
     const lower = userText.toLowerCase();
 
@@ -73,18 +73,18 @@ export function TeachingPage() {
     }
 
     if (lower.includes('fraction') || lower.includes('algebra') || lower.includes('equation')) {
-      return `Great topic. Let's start with the basics.\n\n**Concept**\nA fraction represents a part of a whole. For example, ¾ means 3 equal parts out of 4.\n\n**Example**\nIf a pizza is cut into 4 slices and you eat 3, you have eaten ¾ of the pizza.\n\n**Quick check**\nWhat does ⅕ mean in everyday language? Reply with your answer and I'll check it.`;
+      return `Great topic. Let's start with the basics.\n\n**Concept**\nA fraction represents a part of a whole. For example, 3/4 means 3 equal parts out of 4.\n\n**Example**\nIf a pizza is cut into 4 slices and you eat 3, you have eaten 3/4 of the pizza.\n\n**Quick check**\nWhat does 2/5 mean in everyday language? Reply with your answer and I'll check it.`;
     }
 
     if (lower.includes('photosynthesis') || lower.includes('biology')) {
-      return `Let's learn photosynthesis.\n\nPlants make their own food using sunlight, carbon dioxide, and water. The process produces glucose and releases oxygen.\n\n**Simple equation**\n6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂\n\nWould you like me to explain each step, or shall we do a short quiz?`;
+      return `Let's learn photosynthesis.\n\nPlants make their own food using sunlight, carbon dioxide, and water. The process produces glucose and releases oxygen.\n\n**Simple equation**\n6CO2 + 6H2O + light -> C6H12O6 + 6O2\n\nWould you like me to explain each step, or shall we do a short quiz?`;
     }
 
-    if (lower.includes('bengali') || lower.includes('bangla') || lower.includes('বাংলা')) {
-      return `আমি বাংলায়েও শিখাতে পারি।\n\nআজকের বিষয় বলুন — উদাহরণ: Present Perfect tense, বা ভগ্নাংশ (fractions)। আমি ধাপে ধাপে বুঝিয়ে দেব।`;
+    if (lower.includes('bengali') || lower.includes('bangla')) {
+      return `Ami Banglay o shikhate pari.\n\nAjker bishoy bolun — udahoron: Present Perfect tense, ba fractions. Ami dhape dhape bujhiye debo.`;
     }
 
-    return `I understand you want to learn about: "${userText.slice(0, 120)}${userText.length > 120 ? '…' : ''}".\n\n**Teaching approach (Phase 1)**\n1. I will break the topic into small clear steps.\n2. I will give one example.\n3. I will ask one check question.\n\nPlease confirm the exact topic and your current level (beginner / intermediate / advanced), and I will begin the lesson.\n\n*(Note: Full LLM-powered teaching will be connected via the AI provider abstraction once Supabase Edge Functions and API keys are configured.)*`;
+    return `I understand you want to learn about: "${userText.slice(0, 120)}${userText.length > 120 ? '...' : ''}".\n\n**Teaching approach (Phase 1)**\n1. I will break the topic into small clear steps.\n2. I will give one example.\n3. I will ask one check question.\n\nPlease confirm the exact topic and your current level (beginner / intermediate / advanced), and I will begin the lesson.\n\n*(AI Edge Function is used when deployed; otherwise this local teacher responds.)*`;
   };
 
   const handleSend = async (e?: FormEvent) => {
@@ -108,9 +108,13 @@ export function TeachingPage() {
         await persistMessage(convId, 'user', text);
       }
 
-      await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
+      const history = [...messages, userMsg]
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
-      const replyText = generateLocalTeacherReply(text);
+      const aiResult = await requestTeacherReply(history, subjectSlug);
+      const replyText = aiResult?.content ?? generateLocalTeacherReply(text);
+
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -237,7 +241,7 @@ export function TeachingPage() {
           </button>
         </form>
         <p className="mx-auto mt-2 max-w-2xl text-center text-[11px] text-slate-600">
-          Phase 1 local teacher · Full AI provider coming soon · Conversations are saved when Supabase is configured
+          AI Edge Function when configured · Local teacher fallback · Conversations saved with Supabase
         </p>
       </div>
     </div>
