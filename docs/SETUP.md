@@ -17,6 +17,7 @@ npm install
    - `supabase/migrations/20260914000002_phase2_curriculum.sql`
    - `supabase/migrations/20260914000003_phase2_mastery_revision.sql`
    - `supabase/migrations/20260914000004_phase3_knowledge.sql`
+   - `supabase/migrations/20260914000005_phase3_vector_and_experience.sql`
 
 3. Confirm tables exist.
 4. Copy **Project URL** and **anon public** key from Settings → API.
@@ -39,8 +40,6 @@ cd apps/web
 npm run dev
 ```
 
-Open http://localhost:5173 — Teach, Curriculum, Knowledge, practice MCQs.
-
 ## 5. Optional: real AI (Edge Function)
 
 ```bash
@@ -51,11 +50,10 @@ supabase secrets set OPENAI_API_KEY=sk-...
 ## 6. Deploy frontend (Vercel)
 
 - Import the GitHub repo on Vercel
-- Root uses `vercel.json`
 - Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
 
 ## 7. Security notes
 
 - API keys only as Supabase secrets — never in `VITE_*`
 - RLS on all student data tables
-- Edge Function verifies JWT before calling providers
+- Coding agent never deploys without confirmation

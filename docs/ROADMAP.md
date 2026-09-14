@@ -1,44 +1,18 @@
 # EDUBRAIN AI — Development Roadmap
 
 ## Phase 0 — Architecture ✅
-- Complete architecture document
-- Folder structure
-- Database schema design
-- Agent architecture
-- Memory architecture
-- Provider abstraction
-- Permission model
-- This roadmap
-
 ## Phase 1 — Core Platform (complete)
-- [x] Monorepo scaffold
-- [x] Vite + React + TypeScript + Tailwind
-- [x] PWA manifest + service worker
-- [x] Supabase client + types
-- [x] Auth + profile
-- [x] Dashboard shell
-- [x] Teaching chat + AI Edge Function + local fallback
-- [x] Conversation persistence
-- [x] Mastery table + subjects seed
-- [x] RLS policies
-
 ## Phase 2 — Teaching Engine (MVP complete)
-- [x] Curriculum hierarchy
-- [x] Exercises + attempts
-- [x] Physics / Math / Chem seeds
-- [x] Concept learn + MCQ + mastery
-- [x] Adaptive recommendations
-- [x] Spaced revision (SM-2)
-- [x] Mastery panel on dashboard
 
 ## Phase 3 — Knowledge (in progress)
 - [x] knowledge_documents + knowledge_chunks (pgvector-ready)
 - [x] Note ingestion UI
 - [x] Knowledge page in nav
 - [x] Keyword RAG retrieval injected into teacher
-- [ ] PDF upload + parsing
-- [ ] Embedding pipeline (vector search RPC)
+- [x] Vector search RPC (match_knowledge_chunks)
+- [ ] Embedding generation Edge Function
 - [ ] Source citations in answers
+- [ ] PDF upload + parsing
 
 ## Phase 4 — Voice (started)
 - [x] Browser STT (Web Speech API)
@@ -49,6 +23,7 @@
 
 ## Phase 5 — Coding Agent (scaffold)
 - [x] Permission model + planCodingTask scaffold
+- [x] Coding page UI (plan under SAFE/ASSISTED/AUTONOMOUS)
 - [ ] Repository inspection UI
 - [ ] Code generation + modification
 - [ ] Sandbox execution
@@ -60,5 +35,8 @@
 ## Phase 7 — Deployment
 - Preview / production deploy with approval + rollback
 
-## Phase 8 — Self-Improvement
-- Experience memory, evaluation loops, adaptive strategies
+## Phase 8 — Self-Improvement (started)
+- [x] experience_events table + recordExperience helper
+- [x] Log practice attempts as experience
+- [ ] Evaluation loops
+- [ ] Adaptive strategies from past outcomes
