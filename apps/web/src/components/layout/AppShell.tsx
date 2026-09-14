@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Settings,
+  BookOpen,
   LogOut,
   Brain,
   Menu,
@@ -15,6 +16,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/teach', label: 'Teach', icon: MessageSquare },
+  { to: '/curriculum', label: 'Curriculum', icon: BookOpen },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -30,7 +32,6 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-screen bg-slate-950">
-      {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-900/50 lg:flex">
         <div className="flex h-16 items-center gap-2.5 border-b border-slate-800 px-5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600">
@@ -77,7 +78,6 @@ export function AppShell() {
         </div>
       </aside>
 
-      {/* Mobile header */}
       <div className="flex flex-1 flex-col">
         <header className="flex h-14 items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 backdrop-blur lg:hidden">
           <div className="flex items-center gap-2">
@@ -95,7 +95,6 @@ export function AppShell() {
           </button>
         </header>
 
-        {/* Mobile nav drawer */}
         {mobileOpen && (
           <div className="border-b border-slate-800 bg-slate-900 p-3 lg:hidden">
             <nav className="space-y-1">
