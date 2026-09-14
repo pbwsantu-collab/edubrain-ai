@@ -4,6 +4,7 @@ import {
   MessageSquare,
   Settings,
   BookOpen,
+  BookMarked,
   LogOut,
   Brain,
   Menu,
@@ -17,6 +18,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/teach', label: 'Teach', icon: MessageSquare },
   { to: '/curriculum', label: 'Curriculum', icon: BookOpen },
+  { to: '/knowledge', label: 'Knowledge', icon: BookMarked },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
