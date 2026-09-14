@@ -61,9 +61,7 @@ export function SettingsPage() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-400">
-            Display name
-          </label>
+          <label className="mb-1.5 block text-xs font-medium text-slate-400">Display name</label>
           <input
             type="text"
             value={displayName}
@@ -88,14 +86,10 @@ export function SettingsPage() {
         </div>
 
         {message && (
-          <div className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
-            {message}
-          </div>
+          <div className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">{message}</div>
         )}
         {error && (
-          <div className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
-            {error}
-          </div>
+          <div className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</div>
         )}
 
         <button onClick={handleSave} disabled={saving} className="btn-primary">
