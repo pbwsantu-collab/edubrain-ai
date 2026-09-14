@@ -4,8 +4,7 @@
 
 ```bash
 git clone https://github.com/pbwsantu-collab/edubrain-ai.git
-cd edubrain-ai
-npm install
+cd edubrain-ai && npm install
 ```
 
 ## 2. Supabase migrations (SQL Editor, in order)
@@ -15,6 +14,7 @@ npm install
 - `20260914000003_phase2_mastery_revision.sql`
 - `20260914000004_phase3_knowledge.sql`
 - `20260914000005_phase3_vector_and_experience.sql`
+- `20260914000006_english_curriculum.sql`
 
 ## 3. Frontend env
 
@@ -33,7 +33,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 cd apps/web && npm run dev
 ```
 
-## 5. Edge Functions (optional AI + embeddings)
+## 5. Edge Functions (optional)
 
 ```bash
 supabase functions deploy ai-chat
@@ -43,4 +43,4 @@ supabase secrets set OPENAI_API_KEY=sk-...
 
 ## Deploy
 
-See [`docs/DEPLOY.md`](DEPLOY.md) for Vercel + verification checklist.
+See [`docs/DEPLOY.md`](DEPLOY.md).
