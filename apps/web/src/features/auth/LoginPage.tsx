@@ -4,6 +4,14 @@ import { Brain, Mail, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 
+function formatAuthError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : 'Authentication failed';
+  if (/failed to fetch|networkerror|load failed|fetch/i.test(msg)) {
+    return 'The account server is unreachable. Project qpihivtitywtoxjedyrk no longer resolves. In the Supabase dashboard, resume that project or create a new one, then set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY and restart the app.';
+  }
+  return msg;
+}
+
 export function LoginPage() {
   const { session } = useAuthStore();
   const [email, setEmail] = useState('');
@@ -44,8 +52,7 @@ export function LoginPage() {
         if (signInError) throw signInError;
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Authentication failed';
-      setError(msg);
+      setError(formatAuthError(err));
     } finally {
       setLoading(false);
     }
