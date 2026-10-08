@@ -3,17 +3,26 @@ import { Navigate } from 'react-router-dom';
 import { Brain, Mail, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
+import { isUnreachable, signInLocal, signUpLocal } from '@/lib/localAuth';
 
-function formatAuthError(err: unknown): string {
-  const msg = err instanceof Error ? err.message : 'Authentication failed';
-  if (/failed to fetch|networkerror|load failed|fetch/i.test(msg)) {
-    return 'The account server is unreachable. Project qpihivtitywtoxjedyrk no longer resolves. In the Supabase dashboard, resume that project or create a new one, then set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY and restart the app.';
-  }
-  return msg;
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
 }
 
 export function LoginPage() {
-  const { session } = useAuthStore();
+  const { session, setSession } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -33,26 +42,39 @@ export function LoginPage() {
 
     try {
       if (mode === 'signup') {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              display_name: email.split('@')[0],
-            },
-          },
-        });
+        const { error: signUpError } = await withTimeout(
+          supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { display_name: email.split('@')[0] } },
+          }),
+          5000,
+        );
         if (signUpError) throw signUpError;
         setMessage('Check your email to confirm your account, then sign in.');
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error: signInError } = await withTimeout(
+          supabase.auth.signInWithPassword({ email, password }),
+          5000,
+        );
         if (signInError) throw signInError;
       }
     } catch (err: unknown) {
-      setError(formatAuthError(err));
+      if (!isUnreachable(err)) {
+        setError(err instanceof Error ? err.message : 'Authentication failed');
+        setLoading(false);
+        return;
+      }
+      try {
+        const local =
+          mode === 'signup'
+            ? await signUpLocal(email, password)
+            : await signInLocal(email, password);
+        setSession(local);
+        setMessage('Signed in on this device. Cloud lessons stay offline until Supabase is restored.');
+      } catch (localErr: unknown) {
+        setError(localErr instanceof Error ? localErr.message : 'Could not sign in on this device.');
+      }
     } finally {
       setLoading(false);
     }
@@ -163,7 +185,7 @@ export function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-600">
-          Phase 1 · Secure authentication via Supabase
+          If the cloud project is down, Sign up creates an account on this device.
         </p>
       </div>
     </div>
