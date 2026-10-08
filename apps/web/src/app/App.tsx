@@ -14,6 +14,23 @@ import { KnowledgePage } from '@/features/knowledge/KnowledgePage';
 import { CodingPage } from '@/features/coding/CodingPage';
 import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
+import { isLocalSession, readLocalSession } from '@/lib/localAuth';
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
 
 export default function App() {
   const { setSession, setLoading, setInitialized, refreshProfile } = useAuthStore();
@@ -22,15 +39,18 @@ export default function App() {
     let mounted = true;
 
     async function init() {
+      const local = readLocalSession();
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data } = await withTimeout(supabase.auth.getSession(), 4000);
         if (!mounted) return;
-        setSession(data.session);
-        if (data.session?.user) {
+        const session = data.session ?? local;
+        setSession(session);
+        if (session?.user && !isLocalSession(session)) {
           await refreshProfile();
         }
       } catch (err) {
         console.error('[EDUBRAIN] Auth init error', err);
+        if (mounted && local) setSession(local);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -44,10 +64,11 @@ export default function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session && readLocalSession()) return;
       setSession(session);
-      if (session?.user) {
+      if (session?.user && !isLocalSession(session)) {
         await refreshProfile();
-      } else {
+      } else if (!session) {
         useAuthStore.getState().setProfile(null);
       }
     });
