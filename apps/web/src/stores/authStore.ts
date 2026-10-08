@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { User, Session } from '@supabase/supabase-js';
 import type { Profile } from '@/types/database';
 import { supabase } from '@/lib/supabase';
+import { clearLocalSession, isLocalSession, localProfile } from '@/lib/localAuth';
 
 interface AuthState {
   user: User | null;
@@ -28,6 +29,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({
       session,
       user: session?.user ?? null,
+      profile: isLocalSession(session) && session ? localProfile(session) : get().profile,
     }),
 
   setProfile: (profile) => set({ profile }),
@@ -37,14 +39,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setInitialized: (initialized) => set({ initialized }),
 
   signOut: async () => {
-    await supabase.auth.signOut();
+    clearLocalSession();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      /* backend may be down */
+    }
     set({ user: null, session: null, profile: null });
   },
 
   refreshProfile: async () => {
+    const session = get().session;
     const user = get().user;
-    if (!user) {
+    if (!user || !session) {
       set({ profile: null });
+      return;
+    }
+    if (isLocalSession(session)) {
+      set({ profile: localProfile(session) });
       return;
     }
 
